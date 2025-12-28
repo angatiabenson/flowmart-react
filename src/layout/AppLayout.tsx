@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, Package, FolderTree, Settings, Menu, User, LogOut, Moon, Sun } from 'lucide-react';
 import { cn } from '../ui/primitives';
-import { ViewState } from '../types/types.ts';
+import type { ViewState } from '../types/types';
 import { DropdownMenu, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '../ui/dropdown-menu';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 
 interface AppLayoutProps {
     children: React.ReactNode;
     currentView: ViewState;
-    onChangeView: (view: ViewState) => void;
-    onLogout: () => void;
 }
 
 const SidebarItem = ({ 
@@ -38,8 +38,15 @@ const SidebarItem = ({
     );
 };
 
-export const AppLayout = ({ children, currentView, onChangeView, onLogout }: AppLayoutProps) => {
+function onLogout() {
+    const logout = useAuth().logout;
+    logout();
+}
+
+export const AppLayout = ({ children, currentView }: AppLayoutProps) => {
     const [isDark, setIsDark] = useState(false);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (isDark) {
@@ -72,7 +79,7 @@ export const AppLayout = ({ children, currentView, onChangeView, onLogout }: App
                             icon={LayoutDashboard} 
                             label="Dashboard" 
                             active={currentView === 'dashboard'} 
-                            onClick={() => onChangeView('dashboard')}
+                            onClick={() => navigate('/dashboard')}
                         />
                          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-3 mt-6">
                             Inventory
@@ -81,13 +88,13 @@ export const AppLayout = ({ children, currentView, onChangeView, onLogout }: App
                             icon={Package} 
                             label="All Products" 
                             active={currentView === 'products'} 
-                            onClick={() => onChangeView('products')}
+                            onClick={() => navigate('/products')}
                         />
                         <SidebarItem 
                             icon={FolderTree} 
                             label="Categories" 
                             active={currentView === 'categories'} 
-                            onClick={() => onChangeView('categories')}
+                            onClick={() => navigate('/categories')}
                         />
                          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-3 mt-6">
                             System
@@ -96,7 +103,7 @@ export const AppLayout = ({ children, currentView, onChangeView, onLogout }: App
                             icon={Settings} 
                             label="Settings" 
                             active={currentView === 'settings'} 
-                            onClick={() => onChangeView('settings')}
+                            onClick={() => navigate('/settings')}
                         />
                     </nav>
                 </div>
@@ -120,7 +127,7 @@ export const AppLayout = ({ children, currentView, onChangeView, onLogout }: App
                     >
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => onChangeView('settings')}>
+                        <DropdownMenuItem onClick={() => navigate('/settings')}>
                             <User className="mr-2 h-4 w-4" />
                             Profile Settings
                         </DropdownMenuItem>
