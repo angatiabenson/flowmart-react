@@ -1,25 +1,25 @@
 import { AppLayout } from "@/layout/AppLayout";
 import { Button, Card, CardContent, CardHeader, CardTitle } from '../ui/primitives';
-import { BarChart, DollarSign, AlertTriangle, Package, AlertCircle, RefreshCcw } from 'lucide-react';
+import { BarChart, DollarSign, AlertTriangle, Package, AlertCircle, RefreshCcw, FolderTree } from 'lucide-react';
 import { useEffect, useState } from "react";
 import { useApi } from "@/hooks/useApi";
 import type { Category, Product } from "@/types/api";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const DashboardView = ({ 
-    products, 
-    categories, 
-    isLoading, 
+const DashboardView = ({
+    products,
+    categories,
+    isLoading,
     error,
     onRetry // Good UX: give them a way to fix it
-}: { 
-    products: Product[], 
-    categories: Category[], 
-    isLoading: boolean, 
+}: {
+    products: Product[],
+    categories: Category[],
+    isLoading: boolean,
     error: string | null,
-    onRetry?: () => void 
+    onRetry?: () => void
 }) => {
-    
+
     // 1. LOADING STATE (Skeletons)
     // We show skeletons that match the exact shape of our cards
     if (isLoading) {
@@ -89,14 +89,14 @@ const DashboardView = ({
             </Card>
 
             {/* Active Categories */}
-            <Card className="col-span-1 md:col-span-2 lg:col-span-1 bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+            <Card className={`transition-all hover:shadow-md ${lowStock > 0 ? 'border-destructive/50 bg-destructive/5' : ''}`}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-white/80">Active Categories</CardTitle>
-                    <BarChart className="h-4 w-4 text-white/80" />
+                    <CardTitle className="text-sm font-medium">Active Categories</CardTitle>
+                    <FolderTree className={`h-4 w-4 ${lowStock > 0 ? 'text-destructive animate-pulse' : 'text-muted-foreground'}`} />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">{categories.length}</div>
-                    <p className="text-xs text-white/70">Categories currently in use.</p>
+                    <div className={`text-2xl font-bold`}>{categories.length}</div>
+                    <p className="text-xs text-muted-foreground">Categories currently in use.</p>
                 </CardContent>
             </Card>
         </div>
@@ -151,7 +151,7 @@ export function DashboardPage() {
     }
 
     return <AppLayout currentView="dashboard">
-        <DashboardView products={products} categories={categories} isLoading={isLoading} error={error} onRetry={loadData}/>
+        <DashboardView products={products} categories={categories} isLoading={isLoading} error={error} onRetry={loadData} />
     </AppLayout>;
 }
 

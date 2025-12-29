@@ -1,10 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Package, FolderTree, Settings, Menu, User, LogOut, Moon, Sun } from 'lucide-react';
-import { cn } from '../ui/primitives';
+import React from 'react';
+import { LayoutDashboard, Package, FolderTree, Settings, Menu, User, LogOut, Sun, Moon, Monitor } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import type { ViewState } from '../types/types';
-import { DropdownMenu, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '../ui/dropdown-menu';
+import { Button } from '@/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+    DropdownMenuPortal,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+} from '@/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/ui/avatar';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from 'next-themes';
 
 interface AppLayoutProps {
     children: React.ReactNode;
@@ -23,41 +37,25 @@ const SidebarItem = ({
     onClick: () => void
 }) => {
     return (
-        <button
+        <Button
+            variant={active ? "secondary" : "ghost"}
+            className={cn("w-full justify-start gap-3", active && "bg-accent text-accent-foreground")}
             onClick={onClick}
-            className={cn(
-                "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                active
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-            )}
         >
             <Icon className="h-4 w-4" />
             {label}
-        </button>
+        </Button>
     );
 };
 
-function onLogout() {
-    const logout = useAuth().logout;
-    logout();
-}
-
 export const AppLayout = ({ children, currentView }: AppLayoutProps) => {
-    const [isDark, setIsDark] = useState(false);
-
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
+    const { setTheme } = useTheme();
 
-    useEffect(() => {
-        if (isDark) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    }, [isDark]);
-
-    const toggleTheme = () => setIsDark(!isDark);
+    const onLogout = () => {
+        logout();
+    };
 
     return (
         <div className="min-h-screen bg-muted/40 flex">
@@ -111,48 +109,74 @@ export const AppLayout = ({ children, currentView }: AppLayoutProps) => {
 
                 {/* User Profile Card */}
                 <div className="border-t p-4">
-                    <DropdownMenu
-                        side="top"
-                        align="start"
-                        trigger={
-                            <div className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted cursor-pointer">
-                                <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-bold">
-                                    {user?.name
-                                        ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-                                        : 'A'}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full justify-start px-2 hover:bg-muted">
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarImage src="" alt={user?.name} />
+                                        <AvatarFallback>{user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'U'}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1 text-left overflow-hidden">
+                                        <p className="truncate text-sm font-medium">{user?.name}</p>
+                                        <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
+                                    </div>
                                 </div>
-                                <div className="flex-1 overflow-hidden">
-                                    <p className="truncate text-sm font-medium">{user?.name}</p>
-                                    <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56" align="start" forceMount>
+                            <DropdownMenuLabel className="font-normal">
+                                <div className="flex flex-col space-y-1">
+                                    <p className="text-sm font-medium leading-none">{user?.name}</p>
+                                    <p className="text-xs leading-none text-muted-foreground">
+                                        {user?.email}
+                                    </p>
                                 </div>
-                            </div>
-                        }
-                    >
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => navigate('/settings')}>
-                            <User className="mr-2 h-4 w-4" />
-                            Profile Settings
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={toggleTheme}>
-                            {isDark ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
-                            Toggle Theme
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem variant="destructive" onClick={onLogout}>
-                            <LogOut className="mr-2 h-4 w-4" />
-                            Log out
-                        </DropdownMenuItem>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => navigate('/settings')}>
+                                <User className="mr-2 h-4 w-4" />
+                                Profile Settings
+                            </DropdownMenuItem>
+                            <DropdownMenuSub>
+                                <DropdownMenuSubTrigger>
+                                    <Sun className="mr-2 h-4 w-4 dark:hidden" />
+                                    <Moon className="mr-2 h-4 w-4 hidden dark:block" />
+                                    <span>Theme</span>
+                                </DropdownMenuSubTrigger>
+                                <DropdownMenuPortal>
+                                    <DropdownMenuSubContent>
+                                        <DropdownMenuItem onClick={() => setTheme("light")}>
+                                            <Sun className="mr-2 h-4 w-4" />
+                                            <span>Light</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setTheme("dark")}>
+                                            <Moon className="mr-2 h-4 w-4" />
+                                            <span>Dark</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setTheme("system")}>
+                                            <Monitor className="mr-2 h-4 w-4" />
+                                            <span>System</span>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuSubContent>
+                                </DropdownMenuPortal>
+                            </DropdownMenuSub>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-destructive focus:bg-destructive/10" onClick={onLogout}>
+                                <LogOut className="mr-2 h-4 w-4" />
+                                Log out
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
             </aside>
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
-                <header className="flex h-14 items-center gap-4 border-b bg-background px-6">
-                    <button className="md:hidden">
+                <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur px-6 supports-[backdrop-filter]:bg-background/60">
+                    <Button variant="ghost" size="icon" className="md:hidden">
                         <Menu className="h-6 w-6" />
-                    </button>
+                    </Button>
                     <div className="w-full flex justify-between items-center">
                         <h1 className="text-lg font-semibold">
                             {currentView === 'dashboard' && 'Dashboard'}
