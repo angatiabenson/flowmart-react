@@ -28,3 +28,26 @@ export type LoginResponseData = {
 };
 
 export type LoginResponse = ApiSuccess<LoginResponseData>;
+
+export type Category = {
+  id: number;
+  name: string;
+};
+
+export type Product = {
+  id: number;
+  name: string;
+  quantity: number;
+  category: Category;
+};
+
+export type ProductsListData = {
+  products: Product[];
+}
+
+export type CategoriesListData = {
+  categories: Category[];
+}
+
+export type ProductsListResponse = ApiSuccess<ProductsListData>;
+export type CategoriesListResponse = ApiSuccess<CategoriesListData>;

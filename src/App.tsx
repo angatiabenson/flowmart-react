@@ -1,4 +1,4 @@
-import "./index.css";
+import "./styles/global.css";
 import React, { Suspense, lazy, type JSX } from "react";
 import { useAuth } from "./context/AuthContext";
 import { LoginPage } from "./pages/Login";

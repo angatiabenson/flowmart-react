@@ -1,7 +1,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { apiWrapper, parseApiResponse } from '@/utils/api';
 import axios, { type AxiosInstance } from 'axios';
-import type { LoginResponseData } from '@/types/api';
+import type { CategoriesListData, LoginResponseData, ProductsListData } from '@/types/api';
 import { useMemo } from 'react';
 
 export function useApi() {
@@ -33,5 +33,21 @@ export function useApi() {
                 parser: parseApiResponse
             });
         },
+
+        //Products
+        fetchProducts: async () => {
+            return await apiWrapper<ProductsListData>({
+                apiCall: apiClient.get('products'),
+                parser: parseApiResponse
+            });
+        },
+
+        //Categories
+        fetchCategories: async () => {
+            return await apiWrapper<CategoriesListData>({
+                apiCall: apiClient.get('categories'),
+                parser: parseApiResponse
+            });
+        }
     }), [apiClient]);
 }
