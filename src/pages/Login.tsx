@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Button, Input, Label, Card, CardContent, CardHeader, CardTitle } from '../ui/primitives';
+import { Button, Input, Label, Card, CardContent, CardHeader, CardTitle, ErrorBanner } from '../ui/primitives';
 import { Package } from 'lucide-react';
 import { useApi } from '@/hooks/useApi';
+import { useAuth } from '@/context/AuthContext';
 
 interface LoginPageProps {
     onLogin: () => void;
@@ -14,6 +15,7 @@ export const LoginPage = ({ onLogin, onNavigateToSignUp }: LoginPageProps) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const api = useApi();
+    const authContext = useAuth();
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -25,18 +27,21 @@ export const LoginPage = ({ onLogin, onNavigateToSignUp }: LoginPageProps) => {
 
             if (response.status === 'error') {
                 setError(response.message);
-                setIsLoading(false); // Stop loading on error
                 return;
             }
 
-            // Success case
-            setTimeout(() => {
-                onLogin();
-            }, 800);
+            authContext.login({
+                token: response.data.api_key,
+                id: response.data.user.id,
+                name: response.data.user.name,
+                email: response.data.user.email,
+            });
+
+            onLogin();
         } catch (err) {
-            // Should not be reached for standard API errors anymore
             console.error("Unexpected error:", err);
             setError("An unexpected error occurred. Please try again.");
+        } finally{
             setIsLoading(false);
         }
     };
@@ -59,11 +64,6 @@ export const LoginPage = ({ onLogin, onNavigateToSignUp }: LoginPageProps) => {
                         <CardTitle className="text-lg">Sign In</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {error && (
-                            <div className="mb-4 p-3 rounded-md bg-destructive/10 text-destructive text-sm font-medium">
-                                {error}
-                            </div>
-                        )}
                         <form onSubmit={(e) => handleSubmit(e)} className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
@@ -88,12 +88,16 @@ export const LoginPage = ({ onLogin, onNavigateToSignUp }: LoginPageProps) => {
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="........"
                                     required
                                 />
                             </div>
                             <Button type="submit" className="w-full" disabled={isLoading}>
                                 {isLoading ? "Signing in..." : "Sign In"}
                             </Button>
+                                                    {error && (
+                            <ErrorBanner message={error} />
+                        )}
                         </form>
                     </CardContent>
                 </Card>

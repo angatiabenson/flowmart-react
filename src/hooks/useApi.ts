@@ -27,5 +27,11 @@ export function useApi() {
                 parser: parseApiResponse
             });
         },
+        signup: async (data: { name: string; email: string; phone?: string; password: string; }) => {
+            return await apiWrapper<LoginResponseData>({
+                apiCall: apiClient.post('register', data),
+                parser: parseApiResponse
+            });
+        },
     }), [apiClient]);
 }

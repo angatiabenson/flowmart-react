@@ -75,6 +75,15 @@ export const Label = React.forwardRef<HTMLLabelElement, React.LabelHTMLAttribute
 );
 Label.displayName = "Label";
 
+//Error Banner
+export const ErrorBanner = ({ message }: { message: string }) => {
+    return (
+        <div className="mb-4 p-3 rounded-md bg-destructive/10 text-destructive text-sm font-medium">
+            {message}
+        </div>
+    );
+};
+
 // --- Card ---
 export const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
     ({ className, ...props }, ref) => (

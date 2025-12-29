@@ -11,24 +11,24 @@ interface AppLayoutProps {
     currentView: ViewState;
 }
 
-const SidebarItem = ({ 
-    icon: Icon, 
-    label, 
-    active, 
-    onClick 
-}: { 
-    icon: React.ElementType, 
-    label: string, 
-    active: boolean, 
-    onClick: () => void 
+const SidebarItem = ({
+    icon: Icon,
+    label,
+    active,
+    onClick
+}: {
+    icon: React.ElementType,
+    label: string,
+    active: boolean,
+    onClick: () => void
 }) => {
     return (
         <button
             onClick={onClick}
             className={cn(
                 "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                active 
-                    ? "bg-primary text-primary-foreground" 
+                active
+                    ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
         >
@@ -47,6 +47,7 @@ export const AppLayout = ({ children, currentView }: AppLayoutProps) => {
     const [isDark, setIsDark] = useState(false);
 
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     useEffect(() => {
         if (isDark) {
@@ -75,39 +76,39 @@ export const AppLayout = ({ children, currentView }: AppLayoutProps) => {
                         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-3 mt-2">
                             Overview
                         </div>
-                        <SidebarItem 
-                            icon={LayoutDashboard} 
-                            label="Dashboard" 
-                            active={currentView === 'dashboard'} 
+                        <SidebarItem
+                            icon={LayoutDashboard}
+                            label="Dashboard"
+                            active={currentView === 'dashboard'}
                             onClick={() => navigate('/dashboard')}
                         />
-                         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-3 mt-6">
+                        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-3 mt-6">
                             Inventory
                         </div>
-                        <SidebarItem 
-                            icon={Package} 
-                            label="All Products" 
-                            active={currentView === 'products'} 
+                        <SidebarItem
+                            icon={Package}
+                            label="All Products"
+                            active={currentView === 'products'}
                             onClick={() => navigate('/products')}
                         />
-                        <SidebarItem 
-                            icon={FolderTree} 
-                            label="Categories" 
-                            active={currentView === 'categories'} 
+                        <SidebarItem
+                            icon={FolderTree}
+                            label="Categories"
+                            active={currentView === 'categories'}
                             onClick={() => navigate('/categories')}
                         />
-                         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-3 mt-6">
+                        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-3 mt-6">
                             System
                         </div>
-                        <SidebarItem 
-                            icon={Settings} 
-                            label="Settings" 
-                            active={currentView === 'settings'} 
+                        <SidebarItem
+                            icon={Settings}
+                            label="Settings"
+                            active={currentView === 'settings'}
                             onClick={() => navigate('/settings')}
                         />
                     </nav>
                 </div>
-                
+
                 {/* User Profile Card */}
                 <div className="border-t p-4">
                     <DropdownMenu
@@ -116,11 +117,13 @@ export const AppLayout = ({ children, currentView }: AppLayoutProps) => {
                         trigger={
                             <div className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted cursor-pointer">
                                 <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-bold">
-                                    AU
+                                    {user?.name
+                                        ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                                        : 'A'}
                                 </div>
                                 <div className="flex-1 overflow-hidden">
-                                    <p className="truncate text-sm font-medium">Admin User</p>
-                                    <p className="truncate text-xs text-muted-foreground">admin@flowmart.com</p>
+                                    <p className="truncate text-sm font-medium">{user?.name}</p>
+                                    <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
                                 </div>
                             </div>
                         }
