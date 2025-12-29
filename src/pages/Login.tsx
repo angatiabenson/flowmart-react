@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Input, Label, Card, CardContent, CardHeader, CardTitle } from '../ui/primitives';
 import { Package } from 'lucide-react';
-
+import { useApi } from '@/hooks/useApi';
 interface LoginPageProps {
     onLogin: () => void;
     onNavigateToSignUp: () => void;
@@ -11,15 +11,26 @@ export const LoginPage = ({ onLogin, onNavigateToSignUp }: LoginPageProps) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const api = useApi();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        setIsLoading(true);
-        // Simulate API call
-        setTimeout(() => {
+        try {
+            setIsLoading(true);
+            const response = await api.login(email, password);
+            if (!response.message) {
+                throw new Error(response.message || 'Login failed');
+            }
+
+            setTimeout(() => {
+                setIsLoading(false);
+                onLogin();
+            }, 800);
+        } catch (error) {
+            alert("Login failed. Please check your credentials and try again. "+(error));
+        } finally {
             setIsLoading(false);
-            onLogin();
-        }, 800);
+        }
     };
 
     return (
@@ -40,13 +51,13 @@ export const LoginPage = ({ onLogin, onNavigateToSignUp }: LoginPageProps) => {
                         <CardTitle className="text-lg">Sign In</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <form onSubmit={(e) => handleSubmit(e)} className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
-                                <Input 
-                                    id="email" 
-                                    type="email" 
-                                    placeholder="name@example.com" 
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="name@example.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
@@ -59,9 +70,9 @@ export const LoginPage = ({ onLogin, onNavigateToSignUp }: LoginPageProps) => {
                                         Forgot password?
                                     </button>
                                 </div>
-                                <Input 
-                                    id="password" 
-                                    type="password" 
+                                <Input
+                                    id="password"
+                                    type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
@@ -76,7 +87,7 @@ export const LoginPage = ({ onLogin, onNavigateToSignUp }: LoginPageProps) => {
 
                 <div className="text-center text-sm text-muted-foreground">
                     Don't have an account?{" "}
-                    <button 
+                    <button
                         onClick={onNavigateToSignUp}
                         className="font-medium text-primary hover:underline underline-offset-4"
                     >
