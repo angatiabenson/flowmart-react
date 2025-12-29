@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button, Input, Label, Card, CardContent, CardHeader, CardTitle } from '../ui/primitives';
 import { Package } from 'lucide-react';
 import { useApi } from '@/hooks/useApi';
+
 interface LoginPageProps {
     onLogin: () => void;
     onNavigateToSignUp: () => void;
@@ -11,24 +12,31 @@ export const LoginPage = ({ onLogin, onNavigateToSignUp }: LoginPageProps) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const api = useApi();
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        setError(null);
+        setIsLoading(true);
+
         try {
-            setIsLoading(true);
             const response = await api.login(email, password);
-            if (!response.message) {
-                throw new Error(response.message || 'Login failed');
+
+            if (response.status === 'error') {
+                setError(response.message);
+                setIsLoading(false); // Stop loading on error
+                return;
             }
 
+            // Success case
             setTimeout(() => {
-                setIsLoading(false);
                 onLogin();
             }, 800);
-        } catch (error) {
-            alert("Login failed. Please check your credentials and try again. "+(error));
-        } finally {
+        } catch (err) {
+            // Should not be reached for standard API errors anymore
+            console.error("Unexpected error:", err);
+            setError("An unexpected error occurred. Please try again.");
             setIsLoading(false);
         }
     };
@@ -51,6 +59,11 @@ export const LoginPage = ({ onLogin, onNavigateToSignUp }: LoginPageProps) => {
                         <CardTitle className="text-lg">Sign In</CardTitle>
                     </CardHeader>
                     <CardContent>
+                        {error && (
+                            <div className="mb-4 p-3 rounded-md bg-destructive/10 text-destructive text-sm font-medium">
+                                {error}
+                            </div>
+                        )}
                         <form onSubmit={(e) => handleSubmit(e)} className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>

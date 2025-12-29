@@ -1,5 +1,5 @@
 import type { ApiError, ApiResponse, ApiSuccess } from "@/types/api";
-import type { AxiosResponse } from "axios";
+import { isAxiosError, type AxiosResponse } from "axios";
 
 
 export type APIWrapperProps = {
@@ -23,13 +23,32 @@ export function ensureSuccess<T>(res: ApiResponse<T>): T {
 }
 
 // Convenience: parse JSON into typed ApiResponse<T>
-export async function parseApiResponse<T>(response: Response): Promise<ApiResponse<T>> {
-  const json = await response.json();
-  return json as ApiResponse<T>;
+export async function parseApiResponse<T>(data: any): Promise<ApiResponse<T>> {
+  return data as ApiResponse<T>;
 }
 
-export async function apiWrapper<T> ({apiCall, parser}:APIWrapperProps): Promise<T> {
-  const res = await apiCall;
-  const data = await parser<T>(res.data);
-  return ensureSuccess<T>(data);
+export async function apiWrapper<T> ({apiCall, parser}:APIWrapperProps): Promise<ApiResponse<T>> {
+  try {
+    const res = await apiCall;
+    const data = await parser<T>(res.data);
+    return data;
+  } catch (err) {
+    if (isAxiosError(err)) {
+        const responseData = err.response?.data as any;
+        if (responseData && responseData.status === 'error' && responseData.message) {
+             return responseData as ApiError;
+        }
+        return {
+            status: 'error',
+            code: err.response?.status || 500,
+            message: typeof responseData === 'string' ? responseData : (responseData?.message || err.message || "Unknown API error")
+        };
+    }
+    // Generic error
+    return {
+        status: 'error',
+        code: 500,
+        message: (err as Error).message || "An unexpected error occurred."
+    };
+  }
 }
