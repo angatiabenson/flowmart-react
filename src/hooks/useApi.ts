@@ -41,6 +41,24 @@ export function useApi() {
                 parser: parseApiResponse
             });
         },
+        createProduct: async (data: { name: string; quantity: number; category_id: string; }) => {
+            return await apiWrapper<void>({
+                apiCall: apiClient.post('products', data),
+                parser: parseApiResponse
+            });
+        },
+        updateProduct: async (id: number, data: { name: string; quantity: number; category_id: string; }) => {
+            return await apiWrapper<void>({
+                apiCall: apiClient.put(`products/${id}`, data),
+                parser: parseApiResponse
+            });
+        },
+        deleteProduct: async (id: number) => {
+            return await apiWrapper<void>({
+                apiCall: apiClient.delete(`products/${id}`),
+                parser: parseApiResponse
+            });
+        },
 
         //Categories
         fetchCategories: async () => {

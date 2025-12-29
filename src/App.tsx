@@ -6,6 +6,7 @@ import  {SignUpPage}  from "./pages/Signup";
 import { DashboardPage } from "./pages/Dashboard";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ProductsPage } from "./pages/Products";
 
 const RequireAuth: React.FC<{ children: JSX.Element }> = ({ children }) => {
   const { user } = useAuth();
@@ -24,6 +25,7 @@ export function App() {
               <Route path="/login" element={<LoginPage onLogin={() => navigate('/dashboard')} onNavigateToSignUp={() => navigate('/signup')} />} />
               <Route path="/signup" element={<SignUpPage onSignUp={() => navigate('/dashboard')} onNavigateToLogin={()=> navigate('/login')} />} />
               <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
+              <Route path="/products" element={<RequireAuth><ProductsPage /></RequireAuth>} />
             </Routes>
           </Suspense>
         </main>
